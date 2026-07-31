@@ -39,7 +39,7 @@ class Converter
     /**
      * AD -> BS
      */
-    public function adToBs(Carbon $date): array
+    public function adToBs(String $date): array
     {
 
         $reference = Carbon::parse(
