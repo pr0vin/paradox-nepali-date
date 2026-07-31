@@ -3,6 +3,7 @@
 namespace Paradox\NepaliDate\Services;
 
 use Carbon\Carbon;
+use Paradox\NepaliDate\Objects\NepaliDateObject;
 use Paradox\NepaliDate\Data\CalendarData;
 use Paradox\NepaliDate\Support\Validator;
 
@@ -39,57 +40,47 @@ class Converter
     /**
      * AD -> BS
      */
-    public function adToBs(String $date): array
+    public function adToBs(string $date): NepaliDateObject
     {
+        $date = Carbon::parse($date);
 
         $reference = Carbon::parse(
             self::AD_REFERENCE_DATE
         );
 
-
         $totalDays = $reference->diffInDays($date);
-
 
         $year = self::BS_REFERENCE_YEAR;
         $month = 1;
         $day = 1;
 
-
         while ($totalDays > 0) {
-
 
             $monthDays = CalendarData::monthDays(
                 $year,
                 $month
             );
 
-
             $day++;
 
-
             if ($day > $monthDays) {
-
                 $day = 1;
                 $month++;
             }
 
-
             if ($month > 12) {
-
                 $month = 1;
                 $year++;
             }
 
-
             $totalDays--;
         }
 
-
-        return [
-            'year' => $year,
-            'month' => $month,
-            'day' => $day,
-        ];
+        return new NepaliDateObject(
+            $year,
+            $month,
+            $day
+        );
     }
 
 
