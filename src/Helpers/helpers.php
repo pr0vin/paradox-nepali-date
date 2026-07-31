@@ -3,6 +3,7 @@
 use Paradox\NepaliDate\Services\Converter;
 use Paradox\NepaliDate\Data\NepaliMonth;
 use Paradox\NepaliDate\Data\NepaliWeekDay;
+use Paradox\NepaliDate\Objects\NepaliDateObject;
 
 
 if (! function_exists('nepali_month')) {
@@ -34,7 +35,7 @@ if (! function_exists('nepali_short_week')) {
 
 if (! function_exists('ad_to_bs')) {
 
-    function ad_to_bs(string $date): array
+    function ad_to_bs(string $date): NepaliDateObject
     {
         return (new Converter())
             ->adToBs($date);
