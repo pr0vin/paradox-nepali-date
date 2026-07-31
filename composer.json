@@ -6,7 +6,10 @@
   "autoload": {
     "psr-4": {
       "Paradox\\NepaliDate\\": "src/"
-    }
+    },
+    "files": [
+      "src/Helpers/helpers.php"
+    ]
   },
   "require": {
     "php": "^8.2",
