@@ -4,22 +4,25 @@ namespace Paradox\NepaliDate;
 
 use Carbon\Carbon;
 use Paradox\NepaliDate\Data\CalendarData;
+use Paradox\NepaliDate\Data\NepaliMonth;
+use Paradox\NepaliDate\Data\NepaliWeekDay;
 use Paradox\NepaliDate\Objects\NepaliDate as NepaliDateObject;
 use Paradox\NepaliDate\Services\Converter;
 
+use Paradox\NepaliDate\Objects\EnglishDate;
+
 class NepaliDate
 {
-    protected Converter $converter;
+    public function __construct(
+        protected Converter $converter
+    ) {}
 
-    public function __construct()
-    {
-        $this->converter = new Converter();
-    }
 
     public function parse(string $adDate): NepaliDateObject
     {
         return $this->converter->adToBs($adDate);
     }
+
 
     public function today(): NepaliDateObject
     {
@@ -28,6 +31,7 @@ class NepaliDate
         );
     }
 
+
     public function now(): NepaliDateObject
     {
         return $this->parse(
@@ -35,11 +39,13 @@ class NepaliDate
         );
     }
 
+
     public function create(
         int $year,
         int $month,
         int $day
     ): NepaliDateObject {
+
         return new NepaliDateObject(
             $year,
             $month,
@@ -47,41 +53,56 @@ class NepaliDate
         );
     }
 
+
     public function daysInMonth(
         int $year,
         int $month
     ): int {
+
         return CalendarData::monthDays(
             $year,
             $month
         );
     }
 
-    public function monthName(int $month): string
-    {
-        return \Paradox\NepaliDate\Data\NepaliMonth::name($month);
+
+    public function monthName(
+        int $month
+    ): string {
+
+        return NepaliMonth::name($month);
     }
 
-    public function weekName(int $day): string
-    {
-        return \Paradox\NepaliDate\Data\NepaliWeekDay::name($day);
+
+    public function weekName(
+        int $day
+    ): string {
+
+        return NepaliWeekDay::name($day);
     }
 
-    public function shortWeek(int $day): string
-    {
-        return \Paradox\NepaliDate\Data\NepaliWeekDay::short($day);
+
+    public function shortWeek(
+        int $day
+    ): string {
+
+        return NepaliWeekDay::short($day);
     }
 
-    public function adToBs(string $date): NepaliDateObject
-    {
-        return $this->parse($date);
+
+    public function adToBs(
+        string $date
+    ): NepaliDateObject {
+
+        return $this->converter->adToBs($date);
     }
+
 
     public function bsToAd(
         int $year,
         int $month,
         int $day
-    ): Carbon {
+    ): EnglishDate {
         return $this->converter->bsToAd(
             $year,
             $month,
