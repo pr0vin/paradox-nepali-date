@@ -1,3 +1,35 @@
+# Paradox Nepali Date
+
+A Laravel-friendly Bikram Sambat (BS) date package for converting, formatting, and manipulating Nepali dates.
+
+Built with Carbon compatibility and a simple developer-friendly API.
+
+## Features
+
+- AD ↔ BS conversion
+- Create BS dates
+- Today's Nepali date
+- Nepali month and weekday names
+- Date formatting
+- Human readable dates
+- Carbon conversion
+- Date arithmetic
+- Date comparison
+- JSON serialization
+- Helper functions
+
+---
+
+# Installation
+
+Install via Composer:
+
+```bash
+composer require paradox/nepali-date
+```
+
+---
+
 # Usage
 
 ## Import
@@ -8,28 +40,37 @@ use Paradox\NepaliDate\NepaliDate;
 
 ---
 
-## Convert AD to BS
+# Convert AD to BS
 
 ```php
 $date = NepaliDate::parse('2026-07-31');
 
-echo $date->format();      // 2083-04-15
-echo $date->readable();    // 15 श्रावण 2083
+echo $date->format();
+// 2083-04-15
+
+echo $date->readable();
+// 15 श्रावण 2083
 ```
 
 ---
 
-## Create a BS Date
+# Create a BS Date
 
 ```php
-$date = NepaliDate::bs(2083, 4, 15);
+$date = NepaliDate::create(
+    2083,
+    4,
+    15
+);
 
-echo $date->format();      // 2083-04-15
+echo $date->format();
+
+// 2083-04-15
 ```
 
 ---
 
-## Get Today's Nepali Date
+# Get Today's Nepali Date
 
 ```php
 $date = NepaliDate::today();
@@ -45,52 +86,54 @@ $date = NepaliDate::now();
 
 ---
 
-## Access Date Components
+# Access Date Components
 
 ```php
 $date = NepaliDate::parse('2026-07-31');
 
-$date->year();        // 2083
-$date->month();       // 4
-$date->day();         // 15
+$date->year();
+// 2083
+
+$date->month();
+// 4
+
+$date->day();
+// 15
 ```
 
 ---
 
-## Nepali Month Name
+# Nepali Month Name
 
 ```php
 $date->monthName();
 
-// Output:
 // श्रावण
 ```
 
 ---
 
-## Week Day
+# Week Day
 
 ```php
 $date->weekName();
 
-// Output:
 // शुक्रबार
 ```
 
 ---
 
-## Short Week Day
+# Short Week Day
 
 ```php
 $date->shortWeek();
 
-// Output:
 // शुक्र
 ```
 
 ---
 
-## Format Nepali Date
+# Date Formatting
 
 Default format:
 
@@ -110,7 +153,7 @@ $date->format('/');
 
 ---
 
-## Human Readable Format
+# Human Readable Format
 
 ```php
 $date->readable();
@@ -120,47 +163,184 @@ $date->readable();
 
 ---
 
-## Convert BS to AD
+# Convert BS to AD
 
 ```php
-$date = NepaliDate::bs(2083, 4, 15);
+$date = NepaliDate::create(
+    2083,
+    4,
+    15
+);
 
-echo $date->toCarbon()->format('Y-m-d');
+echo $date
+    ->toCarbon()
+    ->format('Y-m-d');
 
 // 2026-07-31
 ```
 
 ---
 
-## Convert to Array
+# Convert to Array
 
 ```php
 $date->toArray();
 ```
 
-Example output:
+Example:
 
 ```php
 [
     "year" => 2083,
     "month" => 4,
     "day" => 15,
+    "formatted" => "2083-04-15",
+    "readable" => "15 श्रावण 2083",
     "month_name" => "श्रावण",
     "week_name" => "शुक्रबार",
     "short_week" => "शुक्र",
+    "ad_date" => "2026-07-31"
 ]
 ```
 
 ---
 
-## Helper Functions
+# Date Manipulation
 
-If helper functions are enabled, you can use:
+## Add Days
+
+```php
+$date->addDays(10);
+```
+
+## Subtract Days
+
+```php
+$date->subDays(5);
+```
+
+## Add Months
+
+```php
+$date->addMonths(2);
+```
+
+## Subtract Months
+
+```php
+$date->subMonths(1);
+```
+
+## Add Years
+
+```php
+$date->addYears(1);
+```
+
+## Subtract Years
+
+```php
+$date->subYears(1);
+```
+
+---
+
+# Date Comparison
+
+## Equals
+
+```php
+$date1 = NepaliDate::create(2083,4,15);
+
+$date2 = NepaliDate::create(2083,4,15);
+
+$date1->equals($date2);
+
+// true
+```
+
+---
+
+## Before
+
+```php
+$date1->isBefore($date2);
+
+// true / false
+```
+
+---
+
+## After
+
+```php
+$date1->isAfter($date2);
+
+// true / false
+```
+
+---
+
+## Between
+
+```php
+$date->between(
+    NepaliDate::create(2083,4,1),
+    NepaliDate::create(2083,4,30)
+);
+
+// true
+```
+
+---
+
+## Difference In Days
+
+```php
+$date1 = NepaliDate::create(2083,4,15);
+
+$date2 = NepaliDate::create(2083,4,20);
+
+
+$date1->diffInDays($date2);
+
+// 5
+```
+
+---
+
+# Carbon Support
+
+Convert Nepali date to Carbon:
+
+```php
+$date = NepaliDate::create(
+    2083,
+    4,
+    15
+);
+
+$carbon = $date->toCarbon();
+
+echo $carbon->format('Y-m-d');
+
+// 2026-07-31
+```
+
+---
+
+# Helper Functions
+
+If helpers are enabled:
 
 ```php
 ad_to_bs('2026-07-31');
 
-bs_to_ad(2083, 4, 15);
+bs_to_ad(
+    2083,
+    4,
+    15
+);
 
 nepali_month(4);
 
@@ -171,19 +351,42 @@ nepali_short_week(6);
 
 ---
 
-## Example
+# Complete Example
 
 ```php
 use Paradox\NepaliDate\NepaliDate;
 
-$date = NepaliDate::parse('2026-07-31');
 
-echo $date->format();        // 2083-04-15
-echo $date->monthName();     // श्रावण
-echo $date->weekName();      // शुक्रबार
-echo $date->readable();      // 15 श्रावण 2083
+$date = NepaliDate::parse(
+    '2026-07-31'
+);
 
-$adDate = $date->toCarbon()->format('Y-m-d');
 
-echo $adDate;                // 2026-07-31
+echo $date->format();
+// 2083-04-15
+
+
+echo $date->monthName();
+// श्रावण
+
+
+echo $date->weekName();
+// शुक्रबार
+
+
+echo $date->readable();
+// 15 श्रावण 2083
+
+
+echo $date
+    ->toCarbon()
+    ->format('Y-m-d');
+
+// 2026-07-31
 ```
+
+---
+
+# License
+
+MIT License
