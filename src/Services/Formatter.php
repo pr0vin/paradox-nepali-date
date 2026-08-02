@@ -20,7 +20,7 @@ class Formatter
         '6',
         '7',
         '8',
-        '9'
+        '9',
     ];
 
     /**
@@ -36,16 +36,14 @@ class Formatter
         '६',
         '७',
         '८',
-        '९'
+        '९',
     ];
 
     /**
      * Convert English digits to Nepali.
      */
-    public static function toNepaliNumber(
-        string|int $number
-    ): string {
-
+    public static function toNepaliNumber(string|int $number): string
+    {
         return str_replace(
             self::ENGLISH,
             self::NEPALI,
@@ -56,10 +54,8 @@ class Formatter
     /**
      * Convert Nepali digits to English.
      */
-    public static function toEnglishNumber(
-        string $number
-    ): string {
-
+    public static function toEnglishNumber(string $number): string
+    {
         return str_replace(
             self::NEPALI,
             self::ENGLISH,
@@ -68,36 +64,80 @@ class Formatter
     }
 
     /**
-     * Nepali month name.
+     * Full month name.
      */
-    public static function month(
-        int $month
-    ): string {
-
+    public static function month(int $month): string
+    {
         return NepaliMonth::name($month);
     }
 
     /**
-     * Nepali short month.
+     * Short month name.
      */
+    public static function shortMonth(int $month): string
+    {
+        return mb_substr(
+            self::month($month),
+            0,
+            3
+        );
+    }
 
     /**
-     * Nepali week name.
+     * Full weekday.
      */
-    public static function week(
-        int $day
-    ): string {
-
+    public static function week(int $day): string
+    {
         return NepaliWeekDay::name($day);
     }
 
     /**
-     * Nepali short week.
+     * Short weekday.
      */
-    public static function shortWeek(
-        int $day
+    public static function shortWeek(int $day): string
+    {
+        return NepaliWeekDay::short($day);
+    }
+
+    /**
+     * Format a BS date.
+     */
+    public static function format(
+        int $year,
+        int $month,
+        int $day,
+        int $weekDay,
+        string $format = 'Y-m-d',
+        bool $nepaliDigits = false
     ): string {
 
-        return NepaliWeekDay::short($day);
+        $replace = [
+
+            // Year
+            'Y' => sprintf('%04d', $year),
+            'y' => substr((string) $year, -2),
+
+            // Month
+            'm' => sprintf('%02d', $month),
+            'n' => $month,
+            'F' => self::month($month),
+            'M' => self::shortMonth($month),
+
+            // Day
+            'd' => sprintf('%02d', $day),
+            'j' => $day,
+
+            // Weekday
+            'l' => self::week($weekDay),
+            'D' => self::shortWeek($weekDay),
+        ];
+
+        $result = strtr($format, $replace);
+
+        if ($nepaliDigits) {
+            $result = self::toNepaliNumber($result);
+        }
+
+        return $result;
     }
 }

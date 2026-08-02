@@ -176,4 +176,173 @@ class NepaliDate implements JsonSerializable
     {
         return $this->format();
     }
+    /**
+     * Add days.
+     */
+    public function addDays(int $days): self
+    {
+        $ad = $this->toCarbon()->copy()->addDays($days);
+
+        return app(Converter::class)
+            ->adToBs($ad->toDateString());
+    }
+
+    /**
+     * Subtract days.
+     */
+    public function subDays(int $days): self
+    {
+        return $this->addDays(-$days);
+    }
+
+    /**
+     * Add one day.
+     */
+    public function addDay(): self
+    {
+        return $this->addDays(1);
+    }
+
+    /**
+     * Subtract one day.
+     */
+    public function subDay(): self
+    {
+        return $this->subDays(1);
+    }
+
+    /**
+     * Add months.
+     */
+    public function addMonths(int $months): self
+    {
+        $ad = $this->toCarbon()->copy()->addMonths($months);
+
+        return app(Converter::class)
+            ->adToBs($ad->toDateString());
+    }
+
+    /**
+     * Subtract months.
+     */
+    public function subMonths(int $months): self
+    {
+        return $this->addMonths(-$months);
+    }
+
+    /**
+     * Add one month.
+     */
+    public function addMonth(): self
+    {
+        return $this->addMonths(1);
+    }
+
+    /**
+     * Subtract one month.
+     */
+    public function subMonth(): self
+    {
+        return $this->subMonths(1);
+    }
+
+    /**
+     * Add years.
+     */
+    public function addYears(int $years): self
+    {
+        $ad = $this->toCarbon()->copy()->addYears($years);
+
+        return app(Converter::class)
+            ->adToBs($ad->toDateString());
+    }
+
+    /**
+     * Subtract years.
+     */
+    public function subYears(int $years): self
+    {
+        return $this->addYears(-$years);
+    }
+
+    /**
+     * Add one year.
+     */
+    public function addYear(): self
+    {
+        return $this->addYears(1);
+    }
+
+    /**
+     * Subtract one year.
+     */
+    public function subYear(): self
+    {
+        return $this->subYears(1);
+    }
+
+
+    /**
+     * Check if dates are equal.
+     */
+    public function equals(NepaliDate $other): bool
+    {
+        return $this->toCarbon()->isSameDay(
+            $other->toCarbon()
+        );
+    }
+
+
+    /**
+     * Check if this date is before another date.
+     */
+    public function isBefore(NepaliDate $other): bool
+    {
+        return $this->toCarbon()->lt(
+            $other->toCarbon()
+        );
+    }
+
+
+    /**
+     * Check if this date is after another date.
+     */
+    public function isAfter(NepaliDate $other): bool
+    {
+        return $this->toCarbon()->gt(
+            $other->toCarbon()
+        );
+    }
+
+
+    /**
+     * Check if date is between two dates.
+     */
+    public function between(
+        NepaliDate $start,
+        NepaliDate $end,
+        bool $inclusive = true
+    ): bool {
+
+        return $this->toCarbon()->between(
+            $start->toCarbon(),
+            $end->toCarbon(),
+            $inclusive
+        );
+    }
+
+
+    /**
+     * Difference in days.
+     */
+    public function diffInDays(
+        NepaliDate $other,
+        bool $absolute = true
+    ): int {
+
+        return $this->toCarbon()->diffInDays(
+            $other->toCarbon(),
+            $absolute
+        );
+    }
 }
