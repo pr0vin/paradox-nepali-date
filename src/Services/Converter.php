@@ -3,7 +3,7 @@
 namespace Paradox\NepaliDate\Services;
 
 use Carbon\Carbon;
-use Paradox\NepaliDate\Objects\NepaliDateObject;
+use Paradox\NepaliDate\Objects\NepaliDate as NepaliDateObject;
 use Paradox\NepaliDate\Data\CalendarData;
 use Paradox\NepaliDate\Support\Validator;
 

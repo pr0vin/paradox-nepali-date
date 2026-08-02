@@ -7,7 +7,7 @@ use Paradox\NepaliDate\Data\NepaliMonth;
 use Paradox\NepaliDate\Data\NepaliWeekDay;
 use Paradox\NepaliDate\Services\Converter;
 
-class NepaliDateObject
+class NepaliDate
 {
     public function __construct(
         protected int $year,

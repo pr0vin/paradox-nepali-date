@@ -3,7 +3,7 @@
 use Paradox\NepaliDate\Services\Converter;
 use Paradox\NepaliDate\Data\NepaliMonth;
 use Paradox\NepaliDate\Data\NepaliWeekDay;
-use Paradox\NepaliDate\Objects\NepaliDateObject;
+use Paradox\NepaliDate\Objects\NepaliDate as NepaliDateObject;
 
 
 if (! function_exists('nepali_month')) {
