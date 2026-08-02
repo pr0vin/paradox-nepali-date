@@ -3,21 +3,34 @@
 namespace Paradox\NepaliDate;
 
 use Illuminate\Support\ServiceProvider;
+use Paradox\NepaliDate\NepaliDate;
 use Paradox\NepaliDate\Services\Converter;
 
 class NepaliDateServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+
         $this->app->singleton(
-            Converter::class,
-            fn() => new Converter()
+            NepaliDate::class,
+            function () {
+                return new NepaliDate();
+            }
         );
 
 
         $this->app->singleton(
+            Converter::class,
+            function () {
+                return new Converter();
+            }
+        );
+
+
+        // optional alias
+        $this->app->alias(
             NepaliDate::class,
-            fn() => new NepaliDate()
+            'nepali-date'
         );
     }
 

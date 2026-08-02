@@ -35,6 +35,17 @@ class NepaliDate
         return NepaliMonth::name($this->month);
     }
 
+    public function dayOfWeek(): int
+    {
+        /*
+        Sunday = 0
+        Monday = 1
+        ...
+        Saturday = 6
+    */
+
+        return $this->toCarbon()->dayOfWeek;
+    }
     public function weekName(): string
     {
         return NepaliWeekDay::name(
