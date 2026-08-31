@@ -1,32 +1,46 @@
 # Paradox Nepali Date
 
-A Laravel-friendly Bikram Sambat (BS) date package for converting, formatting, and manipulating Nepali dates.
+A Laravel-friendly **Bikram Sambat (BS)** date package for converting, formatting, and manipulating Nepali dates.
 
-Built with Carbon compatibility and a simple developer-friendly API.
+Built with [Carbon](https://carbon.nesbot.com/) compatibility and a simple, developer-friendly API.
 
 ## Features
 
-- AD ↔ BS conversion
+- AD ↔ BS date conversion
 - Create BS dates
-- Today's Nepali date
-- Nepali month and weekday names
+- Get today's Nepali date
+- Nepali month names
+- Nepali weekday names
 - Date formatting
-- Human readable dates
+- Human-readable dates
 - Carbon conversion
 - Date arithmetic
 - Date comparison
+- Difference between dates
 - JSON serialization
 - Helper functions
+- Laravel service container integration
+- PSR-4 autoloading
+
+---
+
+# Requirements
+
+- PHP `^8.2`
+- Laravel `11.x` or `12.x`
+- Carbon `^3.0`
 
 ---
 
 # Installation
 
-Install via Composer:
+Install the package via Composer:
 
 ```bash
 composer require paradox/nepali-date
 ```
+
+The Laravel service provider is automatically registered through Laravel package discovery.
 
 ---
 
@@ -38,12 +52,36 @@ composer require paradox/nepali-date
 use Paradox\NepaliDate\NepaliDate;
 ```
 
+You can resolve the package through Laravel's service container:
+
+```php
+$nepaliDate = app(NepaliDate::class);
+```
+
+Alternatively, use dependency injection:
+
+```php
+use Paradox\NepaliDate\NepaliDate;
+
+class ExampleController
+{
+    public function index(NepaliDate $nepaliDate)
+    {
+        //
+    }
+}
+```
+
+Dependency injection is recommended when using the package inside controllers, services, jobs, and other Laravel classes.
+
 ---
 
 # Convert AD to BS
 
 ```php
-$date = NepaliDate::parse('2026-07-31');
+$nepaliDate = app(NepaliDate::class);
+
+$date = $nepaliDate->parse('2026-07-31');
 
 echo $date->format();
 // 2083-04-15
@@ -52,12 +90,20 @@ echo $date->readable();
 // 15 श्रावण 2083
 ```
 
+You can also use:
+
+```php
+$date = $nepaliDate->adToBs('2026-07-31');
+```
+
 ---
 
 # Create a BS Date
 
 ```php
-$date = NepaliDate::create(
+$nepaliDate = app(NepaliDate::class);
+
+$date = $nepaliDate->create(
     2083,
     4,
     15
@@ -68,20 +114,49 @@ echo $date->format();
 // 2083-04-15
 ```
 
+The arguments are:
+
+```text
+year, month, day
+```
+
+For example:
+
+```php
+$nepaliDate->create(2083, 4, 15);
+```
+
+creates:
+
+```text
+2083-04-15
+```
+
 ---
 
 # Get Today's Nepali Date
 
 ```php
-$date = NepaliDate::today();
+$nepaliDate = app(NepaliDate::class);
+
+$date = $nepaliDate->today();
 
 echo $date->format();
 ```
 
-or
+You can also use:
 
 ```php
-$date = NepaliDate::now();
+$date = $nepaliDate->now();
+```
+
+### `today()` vs `now()`
+
+Both return the current Nepali date.
+
+```php
+$nepaliDate->today();
+$nepaliDate->now();
 ```
 
 ---
@@ -89,15 +164,17 @@ $date = NepaliDate::now();
 # Access Date Components
 
 ```php
-$date = NepaliDate::parse('2026-07-31');
+$nepaliDate = app(NepaliDate::class);
 
-$date->year();
+$date = $nepaliDate->parse('2026-07-31');
+
+echo $date->year();
 // 2083
 
-$date->month();
+echo $date->month();
 // 4
 
-$date->day();
+echo $date->day();
 // 15
 ```
 
@@ -106,57 +183,107 @@ $date->day();
 # Nepali Month Name
 
 ```php
-$date->monthName();
+echo $date->monthName();
+
+// श्रावण
+```
+
+You can also retrieve a month name directly:
+
+```php
+echo $nepaliDate->monthName(4);
 
 // श्रावण
 ```
 
 ---
 
-# Week Day
+# Weekday
+
+Get the full Nepali weekday name:
 
 ```php
-$date->weekName();
+echo $date->weekName();
 
 // शुक्रबार
 ```
 
----
-
-# Short Week Day
+You can also retrieve a weekday directly:
 
 ```php
-$date->shortWeek();
+echo $nepaliDate->weekName(6);
+```
+
+---
+
+# Short Weekday
+
+```php
+echo $date->shortWeek();
 
 // शुक्र
+```
+
+Or:
+
+```php
+echo $nepaliDate->shortWeek(6);
+```
+
+---
+
+# Day of Week
+
+The package provides both standard and ISO weekday numbers.
+
+```php
+$date->dayOfWeek();
+```
+
+Returns:
+
+```text
+0 - 6
+```
+
+ISO weekday:
+
+```php
+$date->dayOfWeekIso();
+```
+
+Returns:
+
+```text
+1 - 7
 ```
 
 ---
 
 # Date Formatting
 
-Default format:
+The default format is:
 
 ```php
-$date->format();
+echo $date->format();
 
 // 2083-04-15
 ```
 
-Custom separator:
+You can specify a custom separator:
 
 ```php
-$date->format('/');
+echo $date->format('/');
 
 // 2083/04/15
 ```
 
 ---
 
-# Human Readable Format
+# Human-Readable Date
 
 ```php
-$date->readable();
+echo $date->readable();
 
 // 15 श्रावण 2083
 ```
@@ -165,18 +292,64 @@ $date->readable();
 
 # Convert BS to AD
 
+Create a BS date:
+
 ```php
-$date = NepaliDate::create(
+$nepaliDate = app(NepaliDate::class);
+
+$date = $nepaliDate->create(
+    2083,
+    4,
+    15
+);
+```
+
+Convert it to Carbon:
+
+```php
+$carbon = $date->toCarbon();
+
+echo $carbon->format('Y-m-d');
+
+// 2026-07-31
+```
+
+You can also use the converter directly through the main API:
+
+```php
+$englishDate = $nepaliDate->bsToAd(
+    2083,
+    4,
+    15
+);
+```
+
+---
+
+# Convert to Carbon
+
+Every `NepaliDate` object can be converted to Carbon:
+
+```php
+$date = $nepaliDate->create(
     2083,
     4,
     15
 );
 
-echo $date
-    ->toCarbon()
-    ->format('Y-m-d');
+$carbon = $date->toCarbon();
+```
 
-// 2026-07-31
+You can then use Carbon functionality:
+
+```php
+echo $carbon->format('Y-m-d');
+```
+
+Result:
+
+```text
+2026-07-31
 ```
 
 ---
@@ -184,23 +357,57 @@ echo $date
 # Convert to Array
 
 ```php
-$date->toArray();
+$array = $date->toArray();
 ```
 
 Example:
 
 ```php
 [
-    "year" => 2083,
-    "month" => 4,
-    "day" => 15,
-    "formatted" => "2083-04-15",
-    "readable" => "15 श्रावण 2083",
-    "month_name" => "श्रावण",
-    "week_name" => "शुक्रबार",
-    "short_week" => "शुक्र",
-    "ad_date" => "2026-07-31"
+    'year' => 2083,
+    'month' => 4,
+    'day' => 15,
+    'formatted' => '2083-04-15',
+    'readable' => '15 श्रावण 2083',
+    'month_name' => 'श्रावण',
+    'week_name' => 'शुक्रबार',
+    'short_week' => 'शुक्र',
+    'ad_date' => '2026-07-31',
 ]
+```
+
+---
+
+# JSON Serialization
+
+`NepaliDate` implements `JsonSerializable`.
+
+Therefore, you can use:
+
+```php
+return response()->json($date);
+```
+
+Or:
+
+```php
+$json = json_encode($date);
+```
+
+The resulting JSON contains the date information:
+
+```json
+{
+  "year": 2083,
+  "month": 4,
+  "day": 15,
+  "formatted": "2083-04-15",
+  "readable": "15 श्रावण 2083",
+  "month_name": "श्रावण",
+  "week_name": "शुक्रबार",
+  "short_week": "शुक्र",
+  "ad_date": "2026-07-31"
+}
 ```
 
 ---
@@ -210,37 +417,77 @@ Example:
 ## Add Days
 
 ```php
-$date->addDays(10);
+$newDate = $date->addDays(10);
 ```
 
 ## Subtract Days
 
 ```php
-$date->subDays(5);
+$newDate = $date->subDays(5);
 ```
+
+## Add One Day
+
+```php
+$newDate = $date->addDay();
+```
+
+## Subtract One Day
+
+```php
+$newDate = $date->subDay();
+```
+
+---
 
 ## Add Months
 
 ```php
-$date->addMonths(2);
+$newDate = $date->addMonths(2);
 ```
 
 ## Subtract Months
 
 ```php
-$date->subMonths(1);
+$newDate = $date->subMonths(1);
 ```
+
+## Add One Month
+
+```php
+$newDate = $date->addMonth();
+```
+
+## Subtract One Month
+
+```php
+$newDate = $date->subMonth();
+```
+
+---
 
 ## Add Years
 
 ```php
-$date->addYears(1);
+$newDate = $date->addYears(1);
 ```
 
 ## Subtract Years
 
 ```php
-$date->subYears(1);
+$newDate = $date->subYears(1);
+```
+
+## Add One Year
+
+```php
+$newDate = $date->addYear();
+```
+
+## Subtract One Year
+
+```php
+$newDate = $date->subYear();
 ```
 
 ---
@@ -250,9 +497,17 @@ $date->subYears(1);
 ## Equals
 
 ```php
-$date1 = NepaliDate::create(2083,4,15);
+$date1 = $nepaliDate->create(
+    2083,
+    4,
+    15
+);
 
-$date2 = NepaliDate::create(2083,4,15);
+$date2 = $nepaliDate->create(
+    2083,
+    4,
+    15
+);
 
 $date1->equals($date2);
 
@@ -284,68 +539,101 @@ $date1->isAfter($date2);
 ## Between
 
 ```php
+$date = $nepaliDate->create(
+    2083,
+    4,
+    15
+);
+
+$start = $nepaliDate->create(
+    2083,
+    4,
+    1
+);
+
+$end = $nepaliDate->create(
+    2083,
+    4,
+    30
+);
+
 $date->between(
-    NepaliDate::create(2083,4,1),
-    NepaliDate::create(2083,4,30)
+    $start,
+    $end
 );
 
 // true
 ```
 
----
-
-## Difference In Days
+You can also control whether the boundaries are inclusive:
 
 ```php
-$date1 = NepaliDate::create(2083,4,15);
+$date->between(
+    $start,
+    $end,
+    false
+);
+```
 
-$date2 = NepaliDate::create(2083,4,20);
+---
 
+# Difference in Days
 
-$date1->diffInDays($date2);
+```php
+$date1 = $nepaliDate->create(
+    2083,
+    4,
+    15
+);
+
+$date2 = $nepaliDate->create(
+    2083,
+    4,
+    20
+);
+
+$difference = $date1->diffInDays($date2);
 
 // 5
 ```
 
 ---
 
-# Carbon Support
-
-Convert Nepali date to Carbon:
-
-```php
-$date = NepaliDate::create(
-    2083,
-    4,
-    15
-);
-
-$carbon = $date->toCarbon();
-
-echo $carbon->format('Y-m-d');
-
-// 2026-07-31
-```
-
----
-
 # Helper Functions
 
-If helpers are enabled:
+The package also provides helper functions when the helper file is loaded.
+
+## AD to BS
 
 ```php
 ad_to_bs('2026-07-31');
+```
 
+## BS to AD
+
+```php
 bs_to_ad(
     2083,
     4,
     15
 );
+```
 
+## Nepali Month
+
+```php
 nepali_month(4);
+```
 
+## Nepali Weekday
+
+```php
 nepali_week(6);
+```
 
+## Short Nepali Weekday
+
+```php
 nepali_short_week(6);
 ```
 
@@ -356,37 +644,82 @@ nepali_short_week(6);
 ```php
 use Paradox\NepaliDate\NepaliDate;
 
+class ExampleController
+{
+    public function index(NepaliDate $nepaliDate)
+    {
+        $date = $nepaliDate->parse(
+            '2026-07-31'
+        );
 
-$date = NepaliDate::parse(
-    '2026-07-31'
+        echo $date->format();
+        // 2083-04-15
+
+        echo $date->monthName();
+        // श्रावण
+
+        echo $date->weekName();
+        // शुक्रबार
+
+        echo $date->readable();
+        // 15 श्रावण 2083
+
+        echo $date
+            ->toCarbon()
+            ->format('Y-m-d');
+
+        // 2026-07-31
+    }
+}
+```
+
+---
+
+# Laravel Service Container
+
+The package registers `NepaliDate` with Laravel's service container.
+
+You can resolve it manually:
+
+```php
+$nepaliDate = app(
+    \Paradox\NepaliDate\NepaliDate::class
 );
+```
 
+Or inject it into your class:
 
-echo $date->format();
-// 2083-04-15
+```php
+use Paradox\NepaliDate\NepaliDate;
 
+public function index(NepaliDate $nepaliDate)
+{
+    $date = $nepaliDate->today();
 
-echo $date->monthName();
-// श्रावण
+    return $date->format();
+}
+```
 
+---
 
-echo $date->weekName();
-// शुक्रबार
+# Testing
 
+The package includes PHPUnit tests.
 
-echo $date->readable();
-// 15 श्रावण 2083
+Run the test suite from the package root:
 
+```bash
+vendor/bin/phpunit
+```
 
-echo $date
-    ->toCarbon()
-    ->format('Y-m-d');
+On Windows PowerShell:
 
-// 2026-07-31
+```powershell
+.\vendor\bin\phpunit
 ```
 
 ---
 
 # License
 
-MIT License
+This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
