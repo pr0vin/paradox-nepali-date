@@ -13,21 +13,26 @@ class EnglishDate implements JsonSerializable
      */
     protected Carbon $date;
 
+
     /**
      * Cached Nepali date.
      */
     protected ?NepaliDate $nepaliDate = null;
 
+
     public function __construct(
         Carbon|string $date
     ) {
+
         $this->date = $date instanceof Carbon
             ? $date
             : Carbon::parse($date);
     }
 
+
+
     /**
-     * Create from year, month, day.
+     * Create date.
      */
     public static function make(
         int $year,
@@ -44,6 +49,8 @@ class EnglishDate implements JsonSerializable
         );
     }
 
+
+
     /**
      * Year.
      */
@@ -51,6 +58,8 @@ class EnglishDate implements JsonSerializable
     {
         return $this->date->year;
     }
+
+
 
     /**
      * Month.
@@ -60,6 +69,8 @@ class EnglishDate implements JsonSerializable
         return $this->date->month;
     }
 
+
+
     /**
      * Day.
      */
@@ -67,6 +78,8 @@ class EnglishDate implements JsonSerializable
     {
         return $this->date->day;
     }
+
+
 
     /**
      * Hour.
@@ -76,6 +89,8 @@ class EnglishDate implements JsonSerializable
         return $this->date->hour;
     }
 
+
+
     /**
      * Minute.
      */
@@ -83,6 +98,8 @@ class EnglishDate implements JsonSerializable
     {
         return $this->date->minute;
     }
+
+
 
     /**
      * Second.
@@ -92,6 +109,8 @@ class EnglishDate implements JsonSerializable
         return $this->date->second;
     }
 
+
+
     /**
      * Month name.
      */
@@ -100,13 +119,17 @@ class EnglishDate implements JsonSerializable
         return $this->date->format('F');
     }
 
+
+
     /**
-     * Short month name.
+     * Short month.
      */
     public function shortMonth(): string
     {
         return $this->date->format('M');
     }
+
+
 
     /**
      * Week day name.
@@ -116,6 +139,8 @@ class EnglishDate implements JsonSerializable
         return $this->date->format('l');
     }
 
+
+
     /**
      * Short week day.
      */
@@ -124,45 +149,73 @@ class EnglishDate implements JsonSerializable
         return $this->date->format('D');
     }
 
+
+
     /**
      * Day of week.
+     *
+     * Sunday = 0
+     * Saturday = 6
      */
     public function dayOfWeek(): int
     {
         return $this->date->dayOfWeek;
     }
 
+
+
     /**
      * ISO day of week.
+     *
+     * Monday = 1
+     * Sunday = 7
      */
     public function dayOfWeekIso(): int
     {
         return $this->date->dayOfWeekIso;
     }
 
+
+
     /**
-     * Leap year.
+     * Check leap year.
      */
     public function isLeapYear(): bool
     {
         return $this->date->isLeapYear();
     }
 
+
+
     /**
-     * Weekend.
+     * Check weekend.
      */
     public function isWeekend(): bool
     {
         return $this->date->isWeekend();
     }
 
+
+
     /**
-     * Weekday.
+     * Check weekday.
      */
     public function isWeekday(): bool
     {
         return $this->date->isWeekday();
     }
+
+
+
+    /**
+     * Check today.
+     */
+    public function isToday(): bool
+    {
+        return $this->date->isToday();
+    }
+
+
 
     /**
      * Format.
@@ -174,6 +227,8 @@ class EnglishDate implements JsonSerializable
         return $this->date->format($format);
     }
 
+
+
     /**
      * Human readable.
      */
@@ -182,19 +237,27 @@ class EnglishDate implements JsonSerializable
         return $this->format('d F Y');
     }
 
+
+
     /**
      * Convert to Nepali.
      */
     public function toNepali(): NepaliDate
     {
+
         if ($this->nepaliDate === null) {
 
             $this->nepaliDate = app(Converter::class)
-                ->adToBs($this->date);
+                ->adToBs(
+                    $this->format()
+                );
         }
+
 
         return $this->nepaliDate;
     }
+
+
 
     /**
      * Carbon instance.
@@ -204,26 +267,107 @@ class EnglishDate implements JsonSerializable
         return $this->date->copy();
     }
 
+
+
     /**
-     * Array.
+     * Add days.
+     */
+    public function addDays(int $days): self
+    {
+        return new self(
+            $this->date
+                ->copy()
+                ->addDays($days)
+        );
+    }
+
+
+
+    /**
+     * Subtract days.
+     */
+    public function subDays(int $days): self
+    {
+        return $this->addDays(-$days);
+    }
+
+
+
+    /**
+     * Compare before.
+     */
+    public function isBefore(self $other): bool
+    {
+        return $this->date->lt(
+            $other->toCarbon()
+        );
+    }
+
+
+
+    /**
+     * Compare after.
+     */
+    public function isAfter(self $other): bool
+    {
+        return $this->date->gt(
+            $other->toCarbon()
+        );
+    }
+
+
+
+    /**
+     * Equal date.
+     */
+    public function equals(self $other): bool
+    {
+        return $this->date->isSameDay(
+            $other->toCarbon()
+        );
+    }
+
+
+
+    /**
+     * Convert to array.
      */
     public function toArray(): array
     {
         return [
+
             'year' => $this->year(),
+
             'month' => $this->month(),
+
             'day' => $this->day(),
+
             'formatted' => $this->format(),
+
             'readable' => $this->readable(),
+
             'month_name' => $this->monthName(),
+
             'short_month' => $this->shortMonth(),
+
             'week_name' => $this->weekName(),
+
             'short_week' => $this->shortWeek(),
+
+            'day_of_week' => $this->dayOfWeek(),
+
+            'day_of_week_iso' => $this->dayOfWeekIso(),
+
             'is_leap_year' => $this->isLeapYear(),
+
             'is_weekend' => $this->isWeekend(),
+
             'bs_date' => $this->toNepali()->format(),
+
         ];
     }
+
+
 
     /**
      * JSON.
@@ -232,6 +376,8 @@ class EnglishDate implements JsonSerializable
     {
         return $this->toArray();
     }
+
+
 
     /**
      * String.

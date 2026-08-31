@@ -1,8 +1,17 @@
 {
   "name": "paradox/nepali-date",
-  "description": "A Laravel package for Bikram Sambat (BS) and Gregorian (AD) date conversion.",
+  "description": "A Laravel package for converting and formatting Bikram Sambat (BS) and Gregorian (AD) dates.",
   "type": "library",
   "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^11.0 || ^12.0",
+    "nesbot/carbon": "^3.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^9.0 || ^10.0",
+    "phpunit/phpunit": "^10.0 || ^11.0"
+  },
   "autoload": {
     "psr-4": {
       "Paradox\\NepaliDate\\": "src/"
@@ -11,10 +20,10 @@
       "src/Helpers/helpers.php"
     ]
   },
-  "require": {
-    "php": "^8.2",
-    "illuminate/support": "^11.0|^12.0",
-    "nesbot/carbon": "^3.0"
+  "autoload-dev": {
+    "psr-4": {
+      "Paradox\\NepaliDate\\Tests\\": "tests/"
+    }
   },
   "extra": {
     "laravel": {
@@ -22,5 +31,10 @@
         "Paradox\\NepaliDate\\NepaliDateServiceProvider"
       ]
     }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "scripts": {
+    "test": "phpunit"
   }
 }

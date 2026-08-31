@@ -1,4 +1,7 @@
 <?php
+
+namespace Paradox\NepaliDate\Support;
+
 class Constants
 {
     public const BS_START_YEAR = 2000;

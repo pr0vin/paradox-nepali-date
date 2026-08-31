@@ -6,6 +6,7 @@ use Paradox\NepaliDate\Data\NepaliWeekDay;
 use Paradox\NepaliDate\Objects\EnglishDate;
 use Paradox\NepaliDate\Objects\NepaliDate as NepaliDateObject;
 use Paradox\NepaliDate\Services\Converter;
+use Paradox\NepaliDate\Support\Formatter;
 
 if (!function_exists('nepali_month')) {
 
@@ -114,5 +115,18 @@ if (!function_exists('now_ad')) {
     function now_ad(): EnglishDate
     {
         return new EnglishDate(now());
+    }
+}
+if (! function_exists('toNepaliNumber')) {
+    function toNepaliNumber(string|int $number): string
+    {
+        return Formatter::toNepaliNumber($number);
+    }
+}
+
+if (! function_exists('toEnglishNumber')) {
+    function toEnglishNumber(string $number): string
+    {
+        return Formatter::toEnglishNumber($number);
     }
 }
