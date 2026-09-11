@@ -216,17 +216,9 @@ class NepaliDateTest extends TestCase
         $this->assertIsString($json);
         $this->assertNotFalse($json);
 
-        $decoded = json_decode(
-            $json,
-            true
-        );
-
-        $this->assertSame(2000, $decoded['year']);
-        $this->assertSame(1, $decoded['month']);
-        $this->assertSame(1, $decoded['day']);
         $this->assertSame(
-            '1943-04-14',
-            $decoded['ad_date']
+            '2000-01-01',
+            json_decode($json)
         );
     }
 }

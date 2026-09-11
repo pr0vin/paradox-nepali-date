@@ -166,7 +166,7 @@ class NepaliDate implements JsonSerializable
      */
     public function jsonSerialize(): mixed
     {
-        return $this->toArray();
+        return $this->format();
     }
 
     /**
