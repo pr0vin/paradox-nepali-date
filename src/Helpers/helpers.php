@@ -54,21 +54,21 @@ if (!function_exists('ad_to_bs')) {
 }
 
 if (!function_exists('bs_to_ad')) {
-
     /**
-     * Convert BS to AD.
+     * Convert BS date string to AD.
      */
-    function bs_to_ad(
-        int $year,
-        int $month,
-        int $day
-    ): EnglishDate {
-        return app(Converter::class)
-            ->bsToAd(
-                $year,
-                $month,
-                $day
-            );
+    function bs_to_ad(string $date): EnglishDate
+    {
+        [$year, $month, $day] = array_map(
+            'intval',
+            explode('-', $date)
+        );
+
+        return app(Converter::class)->bsToAd(
+            $year,
+            $month,
+            $day
+        );
     }
 }
 
