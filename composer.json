@@ -1,5 +1,5 @@
 {
-  "name": "paradox/nepali-date",
+  "name": "parad0x/nepali-date",
   "description": "A Laravel package for converting and formatting Bikram Sambat (BS) and Gregorian (AD) dates.",
   "type": "library",
   "license": "MIT",
