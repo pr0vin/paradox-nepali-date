@@ -3,73 +3,53 @@
 namespace Paradox\NepaliDate\Services;
 
 use Carbon\Carbon;
+use InvalidArgumentException;
 use Paradox\NepaliDate\Data\CalendarData;
+use Paradox\NepaliDate\Objects\EnglishDate;
 use Paradox\NepaliDate\Objects\NepaliDate as NepaliDateObject;
 use Paradox\NepaliDate\Support\Validator;
-use InvalidArgumentException;
-use Paradox\NepaliDate\Objects\EnglishDate;
 
 class Converter
 {
-    /**
-     * BS reference
-     */
     private const BS_REFERENCE_YEAR = 2000;
     private const BS_REFERENCE_MONTH = 1;
     private const BS_REFERENCE_DAY = 1;
 
-    /**
-     * AD reference
-     * 2000-01-01 BS = 1943-04-14 AD
-     */
+    // 2000-01-01 BS = 1943-04-14 AD
     private const AD_REFERENCE_DATE = '1943-04-14';
 
-    /**
-     * Cache total days in BS year
-     */
     protected array $yearDaysCache = [];
 
     /**
-     * Convert BS to AD
+     * Convert a BS date to an AD date.
      */
-    public function bsToAd(
-        int $year,
-        int $month,
-        int $day
-    ): EnglishDate {
+    public function bsToAd(int $year, int $month, int $day): EnglishDate
+    {
         Validator::validateBS($year, $month, $day);
 
         $days = $this->totalBsDays($year, $month, $day);
 
         return new EnglishDate(
-            Carbon::parse(self::AD_REFERENCE_DATE)
-                ->addDays($days)
+            Carbon::parse(self::AD_REFERENCE_DATE)->addDays($days)
         );
     }
 
     /**
-     * Convert AD to BS
+     * Convert an AD date to a BS date.
      */
-    public function adToBs(
-        Carbon|string $date
-    ): NepaliDateObject {
-
+    public function adToBs(Carbon|string $date): NepaliDateObject
+    {
         $date = $date instanceof Carbon
-            ? $date
-            : Carbon::parse($date);
+            ? $date->copy()->startOfDay()
+            : Carbon::parse($date)->startOfDay();
 
-        $reference = Carbon::parse(
-            self::AD_REFERENCE_DATE
-        );
+        $reference = Carbon::parse(self::AD_REFERENCE_DATE)->startOfDay();
 
-        $days = $reference->diffInDays(
-            $date,
-            false
-        );
+        $days = (int) $reference->diffInDays($date, false);
 
         if ($days < 0) {
             throw new InvalidArgumentException(
-                'Date is before supported range.'
+                'Date is before the supported BS calendar range.'
             );
         }
 
@@ -77,99 +57,57 @@ class Converter
         $month = self::BS_REFERENCE_MONTH;
         $day = self::BS_REFERENCE_DAY;
 
-        /*
-         * Skip complete years
-         */
         while ($days >= $this->yearDays($year)) {
-
             $days -= $this->yearDays($year);
-
             $year++;
         }
 
-        /*
-         * Skip complete months
-         */
         while ($days >= CalendarData::monthDays($year, $month)) {
-
-            $days -= CalendarData::monthDays(
-                $year,
-                $month
-            );
-
+            $days -= CalendarData::monthDays($year, $month);
             $month++;
 
             if ($month > 12) {
-
                 $month = 1;
                 $year++;
             }
         }
 
-        /*
-         * Remaining days
-         */
         $day += $days;
 
-        return new NepaliDateObject(
-            $year,
-            $month,
-            $day
-        );
+        return new NepaliDateObject($year, $month, $day);
     }
 
+
+
     /**
-     * Count days from BS reference date
+     * Calculate total days between the reference BS date
+     * and the supplied BS date.
      */
     private function totalBsDays(
         int $year,
         int $month,
         int $day
     ): int {
-
         $total = 0;
 
-        /*
-         * Previous years
-         */
-        for (
-            $y = self::BS_REFERENCE_YEAR;
-            $y < $year;
-            $y++
-        ) {
-
+        for ($y = self::BS_REFERENCE_YEAR; $y < $year; $y++) {
             $total += $this->yearDays($y);
         }
 
-        /*
-         * Previous months
-         */
         for ($m = 1; $m < $month; $m++) {
-
-            $total += CalendarData::monthDays(
-                $year,
-                $m
-            );
+            $total += CalendarData::monthDays($year, $m);
         }
 
-        /*
-         * Current month
-         */
         return $total + ($day - 1);
     }
 
     /**
-     * Total days in BS year
+     * Get the number of days in a BS year.
      */
-    private function yearDays(
-        int $year
-    ): int {
-
-        if (! isset($this->yearDaysCache[$year])) {
-
-            $this->yearDaysCache[$year] = array_sum(
-                CalendarData::year($year)
-            );
+    private function yearDays(int $year): int
+    {
+        if (!isset($this->yearDaysCache[$year])) {
+            $this->yearDaysCache[$year] = CalendarData::yearDays($year);
         }
 
         return $this->yearDaysCache[$year];

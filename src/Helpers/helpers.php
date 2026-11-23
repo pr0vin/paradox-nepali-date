@@ -1,3 +1,4 @@
+
 <?php
 
 use Carbon\Carbon;
@@ -8,57 +9,60 @@ use Paradox\NepaliDate\Objects\NepaliDate as NepaliDateObject;
 use Paradox\NepaliDate\Services\Converter;
 use Paradox\NepaliDate\Support\Formatter;
 
+/**
+ * Get Nepali month name.
+ */
 if (!function_exists('nepali_month')) {
-
-    /**
-     * Get Nepali month name.
-     */
     function nepali_month(int $month): string
     {
         return NepaliMonth::name($month);
     }
 }
 
+/**
+ * Get Nepali weekday name.
+ */
 if (!function_exists('nepali_week')) {
-
-    /**
-     * Get Nepali week day name.
-     */
     function nepali_week(int $day): string
     {
         return NepaliWeekDay::name($day);
     }
 }
 
+/**
+ * Get short Nepali weekday name.
+ */
 if (!function_exists('nepali_short_week')) {
-
-    /**
-     * Get Nepali short week day.
-     */
     function nepali_short_week(int $day): string
     {
         return NepaliWeekDay::short($day);
     }
 }
 
+/**
+ * Convert AD date to BS.
+ */
 if (!function_exists('ad_to_bs')) {
-
-    /**
-     * Convert AD to BS.
-     */
     function ad_to_bs(Carbon|string $date): NepaliDateObject
     {
-        return app(Converter::class)
-            ->adToBs($date);
+        return app(Converter::class)->adToBs($date);
     }
 }
 
+/**
+ * Convert BS date to AD.
+ *
+ * Expected format: YYYY-MM-DD
+ */
 if (!function_exists('bs_to_ad')) {
-    /**
-     * Convert BS date string to AD.
-     */
     function bs_to_ad(string $date): EnglishDate
     {
+        if (!preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/', $date)) {
+            throw new InvalidArgumentException(
+                'Invalid BS date format. Expected YYYY-MM-DD.'
+            );
+        }
+
         [$year, $month, $day] = array_map(
             'intval',
             explode('-', $date)
@@ -72,61 +76,90 @@ if (!function_exists('bs_to_ad')) {
     }
 }
 
+/**
+ * Get today's BS date.
+ */
 if (!function_exists('today_bs')) {
-
-    /**
-     * Today's BS date.
-     */
     function today_bs(): NepaliDateObject
     {
-        return app(Converter::class)
-            ->adToBs(now());
+        return app(Converter::class)->adToBs(today());
     }
 }
 
+/**
+ * Get current BS date.
+ */
 if (!function_exists('now_bs')) {
-
-    /**
-     * Current BS date.
-     */
     function now_bs(): NepaliDateObject
     {
-        return app(Converter::class)
-            ->adToBs(now());
+        return today_bs();
     }
 }
 
+/**
+ * Get today's AD date.
+ */
 if (!function_exists('today_ad')) {
-
-    /**
-     * Today's AD date.
-     */
     function today_ad(): EnglishDate
     {
         return new EnglishDate(today());
     }
 }
 
+/**
+ * Get current AD date.
+ */
 if (!function_exists('now_ad')) {
-
-    /**
-     * Current AD date.
-     */
     function now_ad(): EnglishDate
     {
-        return new EnglishDate(now());
+        return today_ad();
     }
 }
-if (! function_exists('toNepaliNumber')) {
+
+/**
+ * Convert English numbers to Nepali numbers.
+ */
+if (!function_exists('toNepaliNumber')) {
     function toNepaliNumber(string|int $number): string
     {
         return Formatter::toNepaliNumber($number);
     }
 }
 
-if (! function_exists('toEnglishNumber')) {
-    function toEnglishNumber(string $number): string
+/**
+ * Convert Nepali numbers to English numbers.
+ */
+if (!function_exists('toEnglishNumber')) {
+    function toEnglishNumber(string|int $number): string
     {
-        return Formatter::toEnglishNumber($number);
+        return Formatter::toEnglishNumber((string) $number);
+    }
+}
+
+if (!function_exists('bs_year')) {
+    function bs_year(): int
+    {
+        return today_bs()->year();
+    }
+}
+
+if (!function_exists('bs_month')) {
+    function bs_month(): int
+    {
+        return today_bs()->month();
+    }
+}
+
+if (!function_exists('bs_day')) {
+    function bs_day(): int
+    {
+        return today_bs()->day();
+    }
+}
+
+if (!function_exists('bs_readable')) {
+    function bs_readable(?string $week = null): string
+    {
+        return today_bs()->readable($week);
     }
 }

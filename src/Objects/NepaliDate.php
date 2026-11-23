@@ -7,17 +7,74 @@ use JsonSerializable;
 use Paradox\NepaliDate\Support\Formatter;
 use Paradox\NepaliDate\Services\Converter;
 use Paradox\NepaliDate\Objects\EnglishDate;
+use Paradox\NepaliDate\Data\CalendarData;
+use Paradox\NepaliDate\Support\Validator;
 
 class NepaliDate implements JsonSerializable
 {
+    protected int $year;
+    protected int $month;
+    protected int $day;
     protected ?EnglishDate $englishDate = null;
 
     public function __construct(
-        protected int $year,
-        protected int $month,
-        protected int $day
-    ) {}
+        ?int $year = null,
+        ?int $month = null,
+        ?int $day = null
+    ) {
+        if ($year === null && $month === null && $day === null) {
+            $today = app(Converter::class)->adToBs(Carbon::today());
 
+            $this->year = $today->year();
+            $this->month = $today->month();
+            $this->day = $today->day();
+
+            return;
+        }
+
+        if ($year === null || $month === null || $day === null) {
+            throw new \InvalidArgumentException(
+                'Year, month and day must all be provided.'
+            );
+        }
+
+        Validator::validateBS($year, $month, $day);
+
+        $this->year = $year;
+        $this->month = $month;
+        $this->day = $day;
+    }
+
+
+    /**
+     * Get today's Nepali date.
+     */
+    public static function today(): self
+    {
+        return new self();
+    }
+
+    /**
+     * Get current Nepali date.
+     */
+    public static function now(): self
+    {
+        return new self();
+    }
+
+    /**
+     * Create Nepali date from English date.
+     */
+    public static function fromEnglish(Carbon|string $date): self
+    {
+        $converted = app(Converter::class)->adToBs($date);
+
+        return new self(
+            $converted->year(),
+            $converted->month(),
+            $converted->day()
+        );
+    }
     /**
      * Get year.
      */
@@ -52,11 +109,6 @@ class NepaliDate implements JsonSerializable
     /**
      * Day of week (0-6).
      */
-    public function dayOfWeek(): int
-    {
-        return $this->toCarbon()->dayOfWeek;
-    }
-
     /**
      * ISO day of week (1-7).
      */
@@ -103,17 +155,35 @@ class NepaliDate implements JsonSerializable
     }
 
     /**
-     * Human readable.
+     * Human readable date.
+     *
+     * @param string|null $week long, short or null
      */
-    public function readable(): string
+    public function readable(?string $week = null): string
     {
-        return sprintf(
-            '%d %s %d',
-            $this->day,
+        $date = sprintf(
+            '%s %s %s',
+            toNepaliNumber($this->year),
             $this->monthName(),
-            $this->year
+            toNepaliNumber($this->day)
         );
+
+        $weekName = match ($week) {
+            'l' => $this->weekName(),
+            's' => $this->shortWeek(),
+            null => null,
+            default => throw new \InvalidArgumentException(
+                'Week format must be long, short or null.'
+            ),
+        };
+
+        return $weekName
+            ? $date . 'गते' . ', ' . $weekName
+            : $date;
     }
+
+
+
 
     /**
      * Convert to Carbon.
@@ -143,6 +213,7 @@ class NepaliDate implements JsonSerializable
     {
         return $this->toEnglish()->toCarbon();
     }
+
     /**
      * Convert to array.
      */
@@ -152,6 +223,7 @@ class NepaliDate implements JsonSerializable
             'year' => $this->year,
             'month' => $this->month,
             'day' => $this->day,
+            'week' => $this->dayOfWeekIso(),
             'formatted' => $this->format(),
             'readable' => $this->readable(),
             'month_name' => $this->monthName(),
@@ -164,9 +236,9 @@ class NepaliDate implements JsonSerializable
     /**
      * JSON serialization.
      */
-    public function jsonSerialize(): mixed
+    public function jsonSerialize(): array
     {
-        return $this->format();
+        return $this->toArray();
     }
 
     /**
@@ -176,36 +248,34 @@ class NepaliDate implements JsonSerializable
     {
         return $this->format();
     }
+
+    public function dayOfWeek(): int
+    {
+        return $this->toCarbon()->dayOfWeek;
+    }
     /**
      * Add days.
      */
     public function addDays(int $days): self
     {
-        $ad = $this->toCarbon()->copy()->addDays($days);
+        $ad = $this->toCarbon()
+            ->copy()
+            ->addDays($days)
+            ->toDateString();
 
-        return app(Converter::class)
-            ->adToBs($ad->toDateString());
+        return app(Converter::class)->adToBs($ad);
     }
 
-    /**
-     * Subtract days.
-     */
     public function subDays(int $days): self
     {
         return $this->addDays(-$days);
     }
 
-    /**
-     * Add one day.
-     */
     public function addDay(): self
     {
         return $this->addDays(1);
     }
 
-    /**
-     * Subtract one day.
-     */
     public function subDay(): self
     {
         return $this->subDays(1);
@@ -214,73 +284,61 @@ class NepaliDate implements JsonSerializable
     /**
      * Add months.
      */
+
     public function addMonths(int $months): self
     {
-        $ad = $this->toCarbon()->copy()->addMonths($months);
+        $totalMonths = ($this->year * 12)
+            + ($this->month - 1)
+            + $months;
 
-        return app(Converter::class)
-            ->adToBs($ad->toDateString());
+        $year = intdiv($totalMonths, 12);
+        $month = ($totalMonths % 12) + 1;
+
+        $maxDays = CalendarData::monthDays($year, $month);
+        $day = min($this->day, $maxDays);
+
+        return new self($year, $month, $day);
     }
 
-    /**
-     * Subtract months.
-     */
     public function subMonths(int $months): self
     {
         return $this->addMonths(-$months);
     }
 
-    /**
-     * Add one month.
-     */
     public function addMonth(): self
     {
         return $this->addMonths(1);
     }
 
-    /**
-     * Subtract one month.
-     */
     public function subMonth(): self
     {
         return $this->subMonths(1);
     }
 
-    /**
-     * Add years.
-     */
     public function addYears(int $years): self
     {
-        $ad = $this->toCarbon()->copy()->addYears($years);
+        $year = $this->year + $years;
 
-        return app(Converter::class)
-            ->adToBs($ad->toDateString());
+        $maxDays = CalendarData::monthDays($year, $this->month);
+        $day = min($this->day, $maxDays);
+
+        return new self($year, $this->month, $day);
     }
 
-    /**
-     * Subtract years.
-     */
     public function subYears(int $years): self
     {
         return $this->addYears(-$years);
     }
 
-    /**
-     * Add one year.
-     */
     public function addYear(): self
     {
         return $this->addYears(1);
     }
 
-    /**
-     * Subtract one year.
-     */
     public function subYear(): self
     {
         return $this->subYears(1);
     }
-
 
     /**
      * Check if dates are equal.
@@ -339,8 +397,7 @@ class NepaliDate implements JsonSerializable
         NepaliDate $other,
         bool $absolute = true
     ): int {
-
-        return $this->toCarbon()->diffInDays(
+        return (int) $this->toCarbon()->diffInDays(
             $other->toCarbon(),
             $absolute
         );
